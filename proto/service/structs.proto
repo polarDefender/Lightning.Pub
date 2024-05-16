@@ -1,0 +1,445 @@
+syntax = "proto3";
+
+package structs;
+
+option go_package = "github.com/shocknet/lightning.pub";
+
+message Empty {}
+
+
+message EncryptionExchangeRequest {
+    string publicKey = 1;
+    string deviceId = 2;
+}
+
+message UsageMetric {
+    int64 processed_at_ms = 1;
+    int64 parsed_in_nano = 2;
+    int64 auth_in_nano = 3;
+    int64 validate_in_nano = 4;
+    int64 handle_in_nano = 5;
+    string rpc_name = 6;
+    bool batch = 7;
+    bool nostr = 8;
+    int64 batch_size = 9;
+}
+
+message UsageMetrics {
+    repeated UsageMetric metrics = 1; 
+}
+
+message AppsMetricsRequest {
+    optional int64 from_unix = 1;
+    optional int64 to_unix = 2;
+    optional bool include_operations = 3;
+}
+
+message UsersInfo {
+    int64 total = 1;
+    int64 no_balance = 2;
+    int64 negative_balance = 3;
+    int64 always_been_inactive = 4;
+
+    int64 balance_avg = 5;
+    int64 balance_median = 6;
+
+}
+
+message AppMetrics {
+    Application app = 1;
+
+    UsersInfo users = 2;
+
+    int64 received = 5;
+    int64 spent = 6;
+    int64 available = 7;
+    int64 fees = 8;
+    int64 invoices = 9;
+
+    int64 total_fees = 10;
+
+    repeated UserOperation operations = 100;
+}
+
+message AppsMetrics {
+    repeated AppMetrics apps = 1;
+}
+
+message LndMetricsRequest {
+    optional int64 from_unix = 1;
+    optional int64 to_unix = 2;
+}
+
+message RoutingEvent {
+    int64 incoming_channel_id = 1;
+    int64 incoming_htlc_id=2;
+    int64 outgoing_channel_id = 3;
+    int64 outgoing_htlc_id =4;
+    int64 timestamp_ns = 5;
+    string event_type = 6;
+    int64 incoming_amt_msat = 7;
+    int64 outgoing_amt_msat = 8;
+    string failure_string = 9;
+    bool settled = 10;
+    bool offchain = 11;
+    bool forward_fail_event = 12;
+}
+message ChannelBalanceEvent {
+    int64 block_height = 1;
+    string channel_id = 2;
+    int64 local_balance_sats = 3;
+    int64 remote_balance_sats = 4;
+}
+
+message ChainBalanceEvent {
+    int64 block_height = 1;
+    int64 confirmed_balance = 2;
+    int64 unconfirmed_balance = 3;
+    int64 total_balance = 4;
+}
+
+message OpenChannel {
+    string channel_id = 1;
+    int64 capacity = 2;
+    bool active = 3;
+    int64 lifetime =4 ;
+    int64 local_balance=5;
+    int64 remote_balance = 6;
+}
+message ClosedChannel {
+    string channel_id = 1;
+    int64 capacity = 2;
+    int64 closed_height =4;
+}
+
+message ChannelRouting {
+    string channel_id = 1;
+    int64 send_errors = 2;
+    int64 receive_errors = 3;
+    int64 forward_errors_as_input = 4;
+    int64 forward_errors_as_output = 5;
+    int64 missed_forward_fee_as_input = 6;
+    int64 missed_forward_fee_as_output = 7;
+    int64 forward_fee_as_input = 8;
+    int64 forward_fee_as_output = 9;
+    int64 events_number = 10;
+}
+
+message LndNodeMetrics {
+    repeated ChannelBalanceEvent channels_balance_events = 1;
+    repeated ChainBalanceEvent chain_balance_events = 2;
+    int64 offline_channels = 4;
+    int64 online_channels = 5;
+    int64 pending_channels = 6;
+    int64 closing_channels = 7;
+    repeated OpenChannel open_channels = 8;
+    repeated ClosedChannel closed_channels = 9;
+    repeated ChannelRouting channel_routing = 10;
+}
+
+message LndMetrics {
+    repeated LndNodeMetrics nodes = 1;
+
+}
+
+message LndGetInfoRequest {
+    int64 nodeId = 1;
+}
+
+message SetMockInvoiceAsPaidRequest {
+    string invoice = 1;
+    int64 amount =2;
+}
+
+message LndGetInfoResponse {
+    string alias = 1;
+}
+
+message BanUserRequest {
+    string user_id = 1;
+}
+message BannedAppUser {
+    string app_name = 1;
+    string app_id = 2;
+    string user_identifier = 3;
+    string nostr_pub = 4;
+
+}
+message BanUserResponse {
+    int64 balance_sats = 1;
+    repeated BannedAppUser banned_app_users = 2;
+}
+
+message AddAppRequest {
+    string name = 1;
+    bool allow_user_creation = 2;
+}
+
+message AuthAppRequest {
+    string name = 1;
+    optional bool allow_user_creation = 2;
+}
+
+message Application {
+    string name = 1;
+    string id = 2;
+    int64 balance = 3;
+    string npub = 4;
+}
+
+message AuthApp {
+    Application app = 1;
+    string auth_token = 2;
+}
+
+
+message AddAppUserRequest {
+    string identifier = 1;
+    bool fail_if_exists = 2;
+    int64 balance = 3;
+}
+
+message AppUser {
+    string identifier = 1;
+    UserInfo info = 2;
+    int64 max_withdrawable = 3;
+}
+
+message AddAppInvoiceRequest {
+    string payer_identifier = 1;
+    string http_callback_url = 2;
+    NewInvoiceRequest invoice_req = 3;
+}
+
+message AddAppUserInvoiceRequest {
+    string receiver_identifier = 1;
+    string payer_identifier = 2;
+    string http_callback_url = 3;
+    NewInvoiceRequest invoice_req = 4;
+}
+
+message GetAppUserRequest {
+    string user_identifier = 1;
+}
+
+message PayAppUserInvoiceRequest {
+    string user_identifier = 1;
+    string invoice = 2;
+    int64 amount = 3;
+}
+
+message SendAppUserToAppUserPaymentRequest {
+    string from_user_identifier = 1;
+    string to_user_identifier = 2;
+    int64 amount = 3;
+}
+
+message SendAppUserToAppPaymentRequest {
+    string from_user_identifier = 1;
+    int64 amount = 2;
+}
+
+message GetAppUserLNURLInfoRequest {
+    string user_identifier = 1;
+    string base_url_override = 2;
+}
+
+message SetMockAppUserBalanceRequest {
+    string user_identifier = 1;
+    int64 amount = 2;
+}
+
+message SetMockAppBalanceRequest {
+    int64 amount = 1;
+}
+
+enum AddressType {
+    WITNESS_PUBKEY_HASH = 0;
+    NESTED_PUBKEY_HASH = 1;
+    TAPROOT_PUBKEY = 2;
+}
+message NewAddressRequest {
+    AddressType addressType = 1;
+}
+message NewAddressResponse{
+    string address = 1;
+}
+message PayAddressRequest{
+    string address = 1;
+    int64 amoutSats = 2;
+    int64 satsPerVByte = 3;
+}
+
+message PayAddressResponse{
+    string txId = 1;
+    string operation_id = 2;
+    int64 service_fee = 3;
+    int64 network_fee = 4;
+}
+
+message NewInvoiceRequest{
+    int64 amountSats = 1;
+    string memo = 2;
+}
+
+message NewInvoiceResponse{
+    string invoice = 1;
+}
+message DecodeInvoiceRequest{
+    string invoice = 1;
+}
+message DecodeInvoiceResponse{
+    int64 amount=1;
+}
+message PayInvoiceRequest{
+    string invoice = 1;
+    int64 amount = 2;
+}
+
+message PayInvoiceResponse{
+    string preimage = 1;
+    int64 amount_paid = 2;
+    string operation_id = 3;
+    int64 service_fee = 4;
+    int64 network_fee = 5;
+}
+
+message OpenChannelRequest{
+    string destination = 1;
+    int64 fundingAmount = 2;
+    int64 pushAmount = 3;
+    string closeAddress = 4;
+}
+
+message OpenChannelResponse{
+    string channelId = 1;
+}
+
+message LnurlLinkResponse{
+    string lnurl = 1;
+    string k1 = 2;
+}
+
+message LnurlWithdrawInfoResponse {
+    string tag = 1;
+    string callback = 2;
+    string k1 = 3;
+    string defaultDescription = 4;
+    int64 minWithdrawable = 5; // millisatoshi - unsafe overflow possible, but very unlikely 
+    int64 maxWithdrawable = 6; // millisatoshi - unsafe overflow possible, but very unlikely 
+    string balanceCheck = 7;
+    string payLink = 8;
+}
+message LnurlPayInfoResponse {
+    string tag = 1;
+    string callback = 2;
+    int64 maxSendable = 3; // millisatoshi - unsafe overflow possible, but very unlikely 
+    int64 minSendable = 4; // millisatoshi - unsafe overflow possible, but very unlikely 
+    string metadata = 5;
+    bool allowsNostr = 6;
+    string nostrPubkey = 7;
+}
+message HandleLnurlPayResponse {
+    string pr = 1;
+    repeated Empty routes = 2;
+}
+
+message UserInfo{
+    string userId = 1;
+    int64 balance = 2;
+    int64 max_withdrawable = 3;
+    string user_identifier = 4;
+}
+
+message GetUserOperationsRequest{
+    int64 latestIncomingInvoice = 1;
+    int64 latestOutgoingInvoice = 2;
+    int64 latestIncomingTx = 3;
+    int64 latestOutgoingTx = 4;
+    int64 latestIncomingUserToUserPayment = 5;
+    int64 latestOutgoingUserToUserPayment = 6;
+    int64 max_size = 7;
+}
+enum UserOperationType {
+    INCOMING_TX =0;
+    OUTGOING_TX =1;
+    INCOMING_INVOICE =2;
+    OUTGOING_INVOICE=3;
+    OUTGOING_USER_TO_USER=4;
+    INCOMING_USER_TO_USER=5;
+}
+
+message UserOperation {
+    int64 paidAtUnix=1;
+    UserOperationType type = 2; 
+    bool inbound =3;
+    int64 amount = 4;
+    string identifier = 5;
+    string operationId = 6;
+    int64 service_fee = 7;
+    int64 network_fee = 8;
+    bool confirmed = 9;
+    string tx_hash = 10;
+    bool internal = 11;
+}
+message UserOperations {
+    int64 fromIndex=1;
+    int64 toIndex=2;
+    repeated UserOperation operations=3;
+}
+message GetUserOperationsResponse{
+    UserOperations latestOutgoingInvoiceOperations=1; 
+    UserOperations latestIncomingInvoiceOperations=2;
+    UserOperations latestOutgoingTxOperations=3;
+    UserOperations latestIncomingTxOperations=4;
+    UserOperations latestOutgoingUserToUserPayemnts=5;
+    UserOperations latestIncomingUserToUserPayemnts=6;
+}
+
+message AddProductRequest {
+    string name = 1;
+    int64 price_sats = 2;
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    int64 price_sats = 3;
+}
+
+message GetProductBuyLinkResponse {
+    string link = 1;
+}
+
+message LiveUserOperation {
+    UserOperation operation  = 1;
+}
+message MigrationUpdate {
+    optional ClosureMigration closure = 1;
+    optional RelaysMigration relays = 2;
+}
+
+message ClosureMigration {
+    int64 closes_at_unix = 1;
+}
+
+message RelaysMigration {
+    repeated string relays = 1;
+}
+
+
+message RequestNPubLinkingTokenRequest {
+    string user_identifier = 1;
+}
+
+message RequestNPubLinkingTokenResponse {
+    string token = 1;
+}
+
+
+
+message LinkNPubThroughTokenRequest {
+    string token = 1;
+    string nostr_pub = 2;
+}
+
