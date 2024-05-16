@@ -8,7 +8,7 @@ on:
 env:
   REGISTRY: ghcr.io
   # IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: lightning
+  IMAGE_NAME: polarpolarDefender/lightning
 
 jobs:
   build-and-push-image:
